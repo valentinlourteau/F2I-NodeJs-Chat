@@ -1,8 +1,10 @@
 const express = require('express')
 const chat = express()
 const helmet = require('helmet')
+const jwt = require('jsonwebtoken')
 
-const { server: { port } } = require('./config')
+const { server: { port }, jwtSecret } = require('./config')
+const { decodeJWT } = require('./middlewares')
 
 const server = require('http').createServer(chat)
 const io = require('socket.io')(server)
@@ -24,15 +26,22 @@ io.on('connection', socket => {
         msg: 'Un nouvel utilisateur est connecté'
     })
     socket.on('chat', data => {
-        const msg = data
-        socket.broadcast.emit('chat', {
-            from: 'Un autre',
-            msg
+        const {msg, token} = data
+        jwt.verify(token, jwtSecret, (err, decodedToken) => {
+            if (err) {
+                socket.disconnect(true);
+            } else {
+                socket.broadcast.emit('chat', {
+                    from: 'Un autre',
+                    msg
+                })
+                socket.emit('chat', {
+                    from: 'Moi',
+                    msg
+                })
+            }
         })
-        socket.emit('chat', {
-            from: 'Moi',
-            msg
-        })
+        
     })
     socket.on('disconnect', () => {
         socket.broadcast.emit('chat', {
@@ -43,29 +52,29 @@ io.on('connection', socket => {
 })
 
 /* chat.get('/', decodeJWT, (req, res) => { */
-chat.get('/', (req, res) => {
+    chat.get('/', (req, res) => {
     /*
         if(role != 'member' || role != 'admin') {
             return res.sendFile(`${__dirname}/html/404.html`)
         }
-    */
-    res.sendFile(`${__dirname}/html/chat.html`)
-})
-chat.get('/signin', (req, res) => {
-    res.sendFile(`${__dirname}/html/signin.html`)
-})
-chat.get('/signup', (req, res) => {
-    res.sendFile(`${__dirname}/html/signup.html`)
-})
-chat.get('/admin', (req, res) => {
+        */
+        res.sendFile(`${__dirname}/html/chat.html`)
+    })
+    chat.get('/signin', (req, res) => {
+        res.sendFile(`${__dirname}/html/signin.html`)
+    })
+    chat.get('/signup', (req, res) => {
+        res.sendFile(`${__dirname}/html/signup.html`)
+    })
+    chat.get('/admin', (req, res) => {
     /* if (role != 'admin') {
         return res.sendFile(`${__dirname}/html/404.html`)
     } */
     res.sendFile(`${__dirname}/html/users_lists.html`)
 })
-chat.get('*', deadEnd)
-chat.post('*', deadEnd)
-chat.put('*', deadEnd)
-chat.delete('*', deadEnd)
+    chat.get('*', deadEnd)
+    chat.post('*', deadEnd)
+    chat.put('*', deadEnd)
+    chat.delete('*', deadEnd)
 
-server.listen(port.chat, () => console.log(`Chat lancé sur le port ${port.chat}`))
+    server.listen(port.chat, () => console.log(`Chat lancé sur le port ${port.chat}`))

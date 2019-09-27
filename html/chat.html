@@ -68,14 +68,14 @@
   button.addEventListener('click', e => {
     e.preventDefault()
     const data = input.value
-    socket.emit('chat', data)
+    socket.emit('chat', {msg: data, token: localStorage.getItem('token') })
     input.value = ''
   })
   socket.on('chat', data => {
     const { from, msg } = data
     messages.insertAdjacentHTML('beforeend', `<li>
       <strong>${from} : </strong>${msg}
-    </li>`)
+      </li>`)
   })
 </script>
 
