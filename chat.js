@@ -7,8 +7,9 @@ const { server: { port } } = require('./config')
 const server = require('http').createServer(chat)
 const io = require('socket.io')(server)
 
+//Middleware utilisé pour les fausses routes
 const deadEnd = (req, res) => {
-    res.sendFile(`${__dirname}/html/chat.html`)
+    res.sendFile(`${__dirname}/html/404.html`)
 }
 
 chat.use(helmet())
@@ -41,8 +42,26 @@ io.on('connection', socket => {
     })
 })
 
+/* chat.get('/', decodeJWT, (req, res) => { */
 chat.get('/', (req, res) => {
+    /*
+        if(role != 'member' || role != 'admin') {
+            return res.sendFile(`${__dirname}/html/404.html`)
+        }
+    */
     res.sendFile(`${__dirname}/html/chat.html`)
+})
+chat.get('/signin', (req, res) => {
+    res.sendFile(`${__dirname}/html/signin.html`)
+})
+chat.get('/signup', (req, res) => {
+    res.sendFile(`${__dirname}/html/signup.html`)
+})
+chat.get('/admin', (req, res) => {
+    /* if (role != 'admin') {
+        return res.sendFile(`${__dirname}/html/404.html`)
+    } */
+    res.sendFile(`${__dirname}/html/users_lists.html`)
 })
 chat.get('*', deadEnd)
 chat.post('*', deadEnd)
