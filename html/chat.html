@@ -61,10 +61,13 @@
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io()
+  const socket = io.connect('http://localhost:3001', {
+    query: {token: localStorage.getItem('token')}
+  });
   const messages = document.querySelector('#messages')
   const input = document.querySelector('input')
   const button = document.querySelector('button')
+  
   button.addEventListener('click', e => {
     e.preventDefault()
     const data = input.value

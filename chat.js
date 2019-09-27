@@ -16,37 +16,54 @@ const deadEnd = (req, res) => {
 
 chat.use(helmet())
 
-io.on('connection', socket => {
+io.use(function(socket, next){
+  if (socket.handshake.query && socket.handshake.query.token){
+    jwt.verify(socket.handshake.query.token, jwtSecret, function(err, decoded) {
+      if(err) return next(new Error('Authentication error'));
+      socket.clientName = decoded.name;
+      next();
+  });
+} else {
+  next(new Error('Authentication error'));
+}    
+})
+.on('connection', socket => {
+
     socket.emit('chat', {
         from: 'Serveur',
         msg: 'Bienvenue sur le chat'
     })
+
     socket.broadcast.emit('chat', {
         from: 'Serveur',
-        msg: 'Un nouvel utilisateur est connecté'
+        msg: `${socket.clientName} vient de se connecter !`
     })
+
     socket.on('chat', data => {
         const {msg, token} = data
+
+
         jwt.verify(token, jwtSecret, (err, decodedToken) => {
+
             if (err) {
                 socket.disconnect(true);
             } else {
                 socket.broadcast.emit('chat', {
-                    from: 'Un autre',
+                    from: socket.clientName,
                     msg
                 })
                 socket.emit('chat', {
-                    from: 'Moi',
+                    from: socket.clientName + " (moi)",
                     msg
                 })
             }
         })
-        
+
     })
     socket.on('disconnect', () => {
         socket.broadcast.emit('chat', {
             from: 'Serveur',
-            msg: 'L’autre s’est déconnecté'
+            msg: `${socket.clientName} vient de se déconnecter !`
         })
     })
 })
