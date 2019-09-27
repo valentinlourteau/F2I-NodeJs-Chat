@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Chat - Authentification</title>
+        <style>
+            html {
+                font-family: sans-serif;
+            }
+            .msg {
+                font-weight: 900;
+            }
+        </style>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1 class="py-5 text-center">Authentification</h1>
+                    <p class="msg text-center"></p>
+                    <form>
+                        <div class="form-group">
+                            <label for="name">Nom</label>
+                            <input type="text" class="form-control" id="name" placeholder="Name">
+                        </div>
+                        <div class="form-group pb-5">
+                            <label for="password">Mot de passe</label>
+                            <input type="password" class="form-control" id="password" placeholder="Password">
+                        </div>
+                        <input type="submit" class="btn btn-primary" value="Submit">
+                        <input type="reset" class="btn btn-primary" value="Reset">
+                    </form>
+                    <script>
+                        const pMsg = document.querySelector('.msg');
+                        const inputName = document.querySelector('#name');
+                        const inputPassword = document.querySelector('#password');
+                        const inputSubmit = document.querySelector('[type="submit"]');
+
+                        inputSubmit.addEventListener('click', e => {
+                            e.preventDefault();
+                            const name = inputName.value;
+                            const password = inputPassword.value;
+                            const credentials = {
+                                name,
+                                password
+                            }
+                            fetch('http://localhost:3000/auth/signin', {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(credentials)
+                            }).then(res => res.json()).then(json => {
+                                const {status, msg, token} = json
+
+                                // si le status commence par un 4 ou un 5, afficher le message et stoper tout
+                                if (status >= 400) {
+                                    pMsg.innerHTML = msg
+                                    pMsg.classList.add("text-danger")
+                                } else { // Sinon, stocker le token dans le local Storage du navigateur
+
+                                    localStorage.setItem('token', token)
+                                    window.location.href = "/"
+                                }
+
+                                // Afficher le message et sa bonne couleur dans pMsg
+                            })
+                        })
+                    </script>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
