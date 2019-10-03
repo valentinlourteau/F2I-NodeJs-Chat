@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require('cors')
 const api = express();
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
@@ -57,6 +58,7 @@ User.estimatedDocumentCount(async (err, count) => {
 
 api.use(helmet());
 api.use(setResponseHeaders);
+api.use(cors())
 api.use(bodyParser.json());
 api.use(catchJsonError);
 

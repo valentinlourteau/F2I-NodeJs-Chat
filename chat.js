@@ -42,13 +42,10 @@ io.on('connection', socket => {
     })
 })
 
-/* chat.get('/', decodeJWT, (req, res) => { */
+chat.get('/401', (req, res) => {
+    res.sendFile(`${__dirname}/html/401.html`)
+})
 chat.get('/', (req, res) => {
-    /*
-        if(role != 'member' || role != 'admin') {
-            return res.sendFile(`${__dirname}/html/404.html`)
-        }
-    */
     res.sendFile(`${__dirname}/html/chat.html`)
 })
 chat.get('/signin', (req, res) => {
@@ -58,11 +55,12 @@ chat.get('/signup', (req, res) => {
     res.sendFile(`${__dirname}/html/signup.html`)
 })
 chat.get('/admin', (req, res) => {
-    /* if (role != 'admin') {
-        return res.sendFile(`${__dirname}/html/404.html`)
-    } */
-    res.sendFile(`${__dirname}/html/users_lists.html`)
+    res.sendFile(`${__dirname}/html/backoffice_admin_lists.html`)
 })
+chat.get('/admin/:_id', (req, res) => {
+    res.sendFile(`${__dirname}/html/backoffice_admin_edit_user.html`)
+})
+
 chat.get('*', deadEnd)
 chat.post('*', deadEnd)
 chat.put('*', deadEnd)

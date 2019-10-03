@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Chat - Gestion de l'utilisateur</title>
+        <style>
+            html {
+                font-family: sans-serif;
+            }
+            .msg {
+                font-weight: 900;
+            }
+        </style>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/83a4c0c03d.js" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <div class="container" id="listUsers">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1 class="py-5 text-center">Gestion de l'utilisateur</h1>
+                </div>
+                <div class="col-md-8">
+                    <h2 class="h3 mb-4">Modifier l'utilisateur</h2>
+                    <p class="msgModif text-center"></p>
+                    <form>
+                        <div class="form-group">
+                            <label for="iduser">ID</label>
+                            <input type="text" class="form-control" id="iduser" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Nom</label>
+                            <input type="text" class="form-control" id="name">
+                        </div>
+                        <label>
+                            Rôle
+                        </label>
+                        <select name="inputRole" class="custom-select mb-3">
+                            <option id="inputRoleAdmin" value="admin">Admin</option>
+                            <option id="inputRoleMember" value="member">Member</option>
+                        </select>
+                        <input type="submit" class="btn btn-primary" value="Mettre à jour">
+                    </form>
+                </div>
+                <div class="col-md-4">
+                    <h2 class="h3 mb-4 text-center">Supprimer l'utilisateur</h2>
+                    <p class="msgDel text-center"></p>
+                    <div class="py-5 text-center">
+                        <a id="btnDeleteUser" class="btn btn-danger rounded-circle">
+                            <i class="fas fa-2x fa-trash-alt text-white py-1" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            const token = localStorage.getItem('token');
+            const inputID = document.querySelector('#iduser');
+            const inputName = document.querySelector('#name');
+            const inputRoleAdmin = document.querySelector('#inputRoleAdmin');
+            const inputRoleMember = document.querySelector('#inputRoleMember');
+            const inputSubmit = document.querySelector('[type="submit"]');
+            const inputDeleteUser = document.querySelector('#btnDeleteUser');
+            var array = window.location.pathname.split('/');
+            var id = array[2];
+
+
+            window.onload = e => {
+                e.preventDefault();
+                url = "http://localhost:3000/admin/" + id;
+                fetch(url, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': "Bearer " + token
+                    }
+                }).then(res => {
+                    return res.json();
+                }).then(json => {
+                    const {status, msg, user} = json
+                    if (status == 401) {
+                        document.location.href = "/401"
+                    } else {
+                        inputName.setAttribute('value', user.name);
+                        inputID.setAttribute('value', user._id);
+                        if (user.role == "admin") {
+                            inputRoleAdmin.setAttribute('selected', 'selected');
+                            inputRoleMember.removeAttribute("selected")
+                        } else if (user.role == "member") {
+                            inputRoleMember.setAttribute('selected', 'selected');
+                            inputRoleAdmin.removeAttribute("selected")
+                        }
+                    }
+                })
+            },
+            inputSubmit.addEventListener('click', e => {
+                const pMsg = document.querySelector('.msgModif');
+                const name = inputName.value;
+                const inputRole = document.querySelector('select[name=inputRole]');
+                const role = inputRole.value;
+                const credentials = {
+                    name,
+                    role
+                };
+
+                e.preventDefault();
+                url = 'http://localhost:3000/admin/' + id
+                fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': "Bearer " + token
+                    },
+                    body: JSON.stringify(credentials)
+                }).then(res => res.json()).then(json => {
+                    const {status, msg, token} = json
+
+                    if (status >= 400) {
+                        pMsg.innerHTML = msg
+                        pMsg.classList.add("text-danger")
+                    } else {
+                        pMsg.innerHTML = msg
+                        pMsg.classList.add("text-success")
+                    }
+                })
+            })
+            inputDeleteUser.addEventListener('click', e => {
+                const pMsgDel = document.querySelector('.msgDel');
+
+                e.preventDefault();
+                url = 'http://localhost:3000/admin/' + id
+                fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': "Bearer " + token
+                    }
+                }).then(res => res.json()).then(json => {
+                    const {status, msg, token} = json
+
+                    if (status >= 400) {
+                        pMsgDel.innerHTML = msg
+                        pMsg.classList.add("text-danger")
+                    } else {
+                        localStorage.setItem('flashMsg', msg);
+                        window.location.href = "/admin";
+                    }
+                })
+            })
+        </script>
+    </body>
+</html>
