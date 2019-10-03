@@ -20,27 +20,21 @@
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="#">Navbar</a>
+            <a class="navbar-brand" href="#">TP - CHAT</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="/">Chat</a>
-                    </li>
                     <li class="nav-item signin">
                         <a class="nav-link" href="/signin">Signin</a>
                     </li>
                     <li class="nav-item signup">
                         <a class="nav-link" href="/signup">Signup</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin">Backoffice administrateur</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/">Backoffice membres</a>
+                    <li class="nav-item logout">
+                        <a class="nav-link" href="#">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -67,6 +61,19 @@
                         const inputName = document.querySelector('#name');
                         const inputPassword = document.querySelector('#password');
                         const inputSubmit = document.querySelector('[type="submit"]');
+                        const token = localStorage.getItem('token');
+
+                        window.onload = () => {
+                            if (token) {
+                                document.querySelector('.signin').setAttribute('style', 'display: none');
+                                document.querySelector('.signup').setAttribute('style', 'display: none');
+                                document.querySelector('.logout').setAttribute('style', 'display: block');
+                            } else {
+                                document.querySelector('.logout').setAttribute('style', 'display: none');
+                                document.querySelector('.signin').setAttribute('style', 'display: block');
+                                document.querySelector('.signup').setAttribute('style', 'display: block');
+                            }
+                        },
 
                         inputSubmit.addEventListener('click', e => {
                             e.preventDefault();
@@ -84,15 +91,21 @@
                                 },
                                 body: JSON.stringify(credentials)
                             }).then(res => res.json()).then(json => {
-                                const {status, msg, token} = json
+                                const {
+                                    status,
+                                    msg,
+                                    token,
+                                    id,
+                                    role
+                                } = json
 
-                                // si le status commence par un 4 ou un 5, afficher le message et stoper tout
                                 if (status >= 400) {
                                     pMsg.innerHTML = msg
                                     pMsg.classList.add("text-danger")
-                                } else { // Sinon, stocker le token dans le local Storage du navigateur
-
+                                } else {
                                     localStorage.setItem('token', token)
+                                    localStorage.setItem('id', id)
+                                    localStorage.setItem('role', role)
                                     localStorage.setItem('flashMsg', msg)
                                     window.location.href = "/"
                                 }

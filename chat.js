@@ -46,6 +46,7 @@ chat.get('/401', (req, res) => {
     res.sendFile(`${__dirname}/html/401.html`)
 })
 chat.get('/', (req, res) => {
+
     res.sendFile(`${__dirname}/html/chat.html`)
 })
 chat.get('/signin', (req, res) => {
@@ -60,6 +61,7 @@ chat.get('/admin', (req, res) => {
 chat.get('/admin/:_id', (req, res) => {
     res.sendFile(`${__dirname}/html/backoffice_admin_edit_user.html`)
 })
+
 
 chat.get('*', deadEnd)
 chat.post('*', deadEnd)
