@@ -62,7 +62,7 @@ router.put("/:_id", async (req, res) => {
 
       if (typeof req.body.name !== 'undefined') {
         const doublon = await User.find({ name : req.body.name});
-        if (doublon.length > 0) {
+        if (doublon.length > 0 && doublon[0].name !== name) {
           return res.status(400).json({
             status: 400,
             msg: "Un utilisateur avec ce nom existe déjà"
@@ -79,7 +79,7 @@ router.put("/:_id", async (req, res) => {
         _id: userId
       }, {
         name: req.body.name,
-        role: req.body.role
+        role: newRole
       }, {
         new: true,
         omitUndefined: true
