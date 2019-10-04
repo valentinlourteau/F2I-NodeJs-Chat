@@ -27,53 +27,54 @@ io.use(function (socket, next) {
         next(new Error('Authentication error'));
     }
 })
-    .on('connection', socket => {
+.on('connection', socket => {
 
-        socket.emit('chat', {
-            from: 'Serveur',
-            msg: 'Bienvenue sur le chat'
+    socket.emit('chat', {
+        from: 'Serveur',
+        msg: 'Bienvenue sur le chat'
+    })
+
+    socket.broadcast.emit('chat', {
+        from: 'Serveur',
+        msg: `${socket.clientName} vient de se connecter !`
+    })
+
+    socket.on('chat', data => {
+        const { msg, token } = data
+
+        console.log(token);
+
+
+        jwt.verify(token, jwtSecret, (err, decodedToken) => {
+
+            if (err) {
+                socket.disconnect(true);
+            } else {
+                socket.broadcast.emit('chat', {
+                    from: socket.clientName,
+                    msg
+                })
+                socket.emit('chat', {
+                    from: socket.clientName + " (moi)",
+                    msg
+                })
+            }
         })
 
+    })
+    socket.on('disconnect', () => {
         socket.broadcast.emit('chat', {
             from: 'Serveur',
-            msg: `${socket.clientName} vient de se connecter !`
-        })
-
-        socket.on('chat', data => {
-            const { msg, token } = data
-
-            console.log(token);
-
-
-            jwt.verify(token, jwtSecret, (err, decodedToken) => {
-
-                if (err) {
-                    socket.disconnect(true);
-                } else {
-                    socket.broadcast.emit('chat', {
-                        from: socket.clientName,
-                        msg
-                    })
-                    socket.emit('chat', {
-                        from: socket.clientName + " (moi)",
-                        msg
-                    })
-                }
-            })
-
-        })
-        socket.on('disconnect', () => {
-            socket.broadcast.emit('chat', {
-                from: 'Serveur',
-                msg: `${socket.clientName} vient de se déconnecter !`
-            })
+            msg: `${socket.clientName} vient de se déconnecter !`
         })
     })
+})
 
 chat.get('/401', (req, res) => {
     res.sendFile(`${__dirname}/html/401.html`)
 })
 chat.get('/', (req, res) => {
+    console.log('ça')
     res.sendFile(`${__dirname}/html/chat.html`)
 })
 chat.get('/signin', (req, res) => {
