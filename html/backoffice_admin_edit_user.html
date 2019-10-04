@@ -109,6 +109,7 @@
                 document.querySelector('.BOAdmin').setAttribute('style', 'display: none');
                 document.querySelector('.BOMember').setAttribute('style', 'display: block');
                 document.querySelector('.BOMember a').setAttribute('href', '/admin/' + id);
+                document.querySelector('select[name=inputRole]').setAttribute('disabled', 'disabled');
             }
 
             document.querySelector('.logout').addEventListener('click', e => {

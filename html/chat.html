@@ -96,54 +96,65 @@
     </body>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-  const socket = io.connect('http://localhost:3001', {
-    query: {token: localStorage.getItem('token')}
-  });
-        const messages = document.querySelector('#messages')
-        const input = document.querySelector('input')
-        const button = document.querySelector('button')
-
         const token = localStorage.getItem('token');
-        const id = localStorage.getItem('id');
-        const role = localStorage.getItem('role');
 
         if (token) {
-            document.querySelector('.logout').setAttribute('style', 'display: block');
-        } else {
-            document.querySelector('.logout').setAttribute('style', 'display: none');
-            document.querySelector('.BOAdmin').setAttribute('style', 'display: none');
-            document.querySelector('.BOMember').setAttribute('style', 'display: none');
-        }
+            const socket = io.connect('http://localhost:3001', {
+                query: {
+                    token: localStorage.getItem('token')
+                }
+            });
+            const messages = document.querySelector('#messages')
+            const input = document.querySelector('input')
+            const button = document.querySelector('button')
 
-        if (role == 'admin') {
-            document.querySelector('.BOAdmin').setAttribute('style', 'display: block');
-            document.querySelector('.BOMember').setAttribute('style', 'display: none');
-        } else if (role == "member") {
-            document.querySelector('.BOAdmin').setAttribute('style', 'display: none');
-            document.querySelector('.BOMember').setAttribute('style', 'display: block');
-            document.querySelector('.BOMember a').setAttribute('href', '/admin/' + id);
-        }
+            const token = localStorage.getItem('token');
+            const id = localStorage.getItem('id');
+            const role = localStorage.getItem('role');
 
-        document.querySelector('.logout').addEventListener('click', e => {
-            e.preventDefault()
-            window.localStorage.removeItem('token');
-            window.localStorage.removeItem('id');
-            window.localStorage.removeItem('role');
-            window.localStorage.removeItem('flashMsg');
-            window.location.href = '/signin'
-        })
-        button.addEventListener('click', e => {
-            e.preventDefault()
-            const data = input.value
-    socket.emit('chat', {msg: data, token: localStorage.getItem('token') })
-            input.value = ''
-        })
-        socket.on('chat', data => {
-            const {from, msg} = data
-            messages.insertAdjacentHTML('beforeend', `<li>
+            if (token) {
+                document.querySelector('.logout').setAttribute('style', 'display: block');
+            } else {
+                document.querySelector('.logout').setAttribute('style', 'display: none');
+                document.querySelector('.BOAdmin').setAttribute('style', 'display: none');
+                document.querySelector('.BOMember').setAttribute('style', 'display: none');
+            }
+
+            if (role == 'admin') {
+                document.querySelector('.BOAdmin').setAttribute('style', 'display: block');
+                document.querySelector('.BOMember').setAttribute('style', 'display: none');
+            } else if (role == "member") {
+                document.querySelector('.BOAdmin').setAttribute('style', 'display: none');
+                document.querySelector('.BOMember').setAttribute('style', 'display: block');
+                document.querySelector('.BOMember a').setAttribute('href', '/admin/' + id);
+            }
+
+            document.querySelector('.logout').addEventListener('click', e => {
+                e.preventDefault()
+                window.localStorage.removeItem('token');
+                window.localStorage.removeItem('id');
+                window.localStorage.removeItem('role');
+                window.localStorage.removeItem('flashMsg');
+                window.location.href = '/signin'
+            })
+            button.addEventListener('click', e => {
+                e.preventDefault()
+                const data = input.value
+                socket.emit('chat', {
+                    msg: data,
+                    token: localStorage.getItem('token')
+                })
+                input.value = ''
+            })
+            socket.on('chat', data => {
+                const {from, msg} = data
+                messages.insertAdjacentHTML('beforeend', `<li>
       <strong>${from} : </strong>${msg}
       </li>`)
-        })
+            })
+        } else {
+            window.location.href = '/401'
+        }
     </script>
 
 </html>
