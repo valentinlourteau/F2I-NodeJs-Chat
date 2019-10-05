@@ -17,10 +17,13 @@ router.post("/signin", async (req, res) => {
       throw { status: 400, msg: "Mauvais mot de passe" };
     }
     const token = userFound.generateJwt();
+
     res.json({
       status: 200,
       msg: `Bienvenu ${userFound.name}`,
-      token
+      token: token,
+      id: userFound._id,
+      role: userFound.role
     });
   } catch (err) {
     console.log(err);
